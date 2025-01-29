@@ -1,6 +1,7 @@
 import { useEffect, useRef } from "react";
 import { Trash2 } from "lucide-react";
 import { Button } from "./ui/button";
+import { motion } from "framer-motion";
 
 interface PhotoMosaicProps {
   photos: Array<{ image: string; name: string }>;
@@ -24,22 +25,30 @@ export const PhotoMosaic = ({ photos, isAdmin = false, onDeletePhoto }: PhotoMos
   }, [photos]);
 
   return (
-    <div ref={containerRef} className="photo-text-container bg-black">
-      <h1 className="photo-text absolute inset-0 flex items-center justify-center font-black text-[15vw] tracking-tight">
+    <div ref={containerRef} className="photo-text-container">
+      <motion.h1 
+        className="photo-text absolute inset-0 flex items-center justify-center"
+        initial={{ opacity: 0, scale: 0.5 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 1, ease: "easeOut" }}
+      >
         QIS FEST
-      </h1>
-      <div className="absolute inset-0 grid grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-2 p-4">
+      </motion.h1>
+      <div className="absolute inset-0 grid grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-4 p-8">
         {photos.map((photo, index) => (
-          <div
+          <motion.div
             key={index}
-            className="relative aspect-square rounded-lg overflow-hidden shadow-lg transform hover:scale-105 transition-transform"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: index * 0.1 }}
+            className="relative aspect-square rounded-xl overflow-hidden shadow-2xl transform hover:scale-105 transition-transform duration-300"
           >
             <img
               src={photo.image}
               alt={photo.name}
               className="w-full h-full object-cover"
             />
-            <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center flex-col gap-2">
+            <div className="absolute inset-0 bg-black/60 opacity-0 hover:opacity-100 transition-opacity duration-300 flex items-center justify-center flex-col gap-2">
               <p className="text-white text-sm font-medium">{photo.name}</p>
               {isAdmin && onDeletePhoto && (
                 <Button
@@ -52,7 +61,7 @@ export const PhotoMosaic = ({ photos, isAdmin = false, onDeletePhoto }: PhotoMos
                 </Button>
               )}
             </div>
-          </div>
+          </motion.div>
         ))}
       </div>
     </div>
