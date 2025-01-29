@@ -43,13 +43,15 @@
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
-  font-size: clamp(4rem, 20vw, 12rem);
+  font-size: clamp(6rem, 15vw, 20rem);
   font-weight: 900;
   line-height: 0.9;
   text-align: center;
   margin: 0;
   padding: 0;
   mix-blend-mode: multiply;
+  letter-spacing: -0.05em;
+  text-transform: uppercase;
 }
 
 .photo-text-container {
@@ -59,6 +61,8 @@
   aspect-ratio: 16/9;
   background: black;
   overflow: hidden;
+  border-radius: 1rem;
+  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
 }
 
 .camera-container {

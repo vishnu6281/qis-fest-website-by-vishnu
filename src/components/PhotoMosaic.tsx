@@ -24,13 +24,15 @@ export const PhotoMosaic = ({ photos, isAdmin = false, onDeletePhoto }: PhotoMos
   }, [photos]);
 
   return (
-    <div ref={containerRef} className="photo-text-container">
-      <h1 className="photo-text absolute inset-0 flex items-center justify-center">QIS FEST</h1>
-      <div className="absolute inset-0 grid grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-1 p-2">
+    <div ref={containerRef} className="photo-text-container bg-black">
+      <h1 className="photo-text absolute inset-0 flex items-center justify-center font-black text-[15vw] tracking-tight">
+        QIS FEST
+      </h1>
+      <div className="absolute inset-0 grid grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-2 p-4">
         {photos.map((photo, index) => (
           <div
             key={index}
-            className="relative aspect-square rounded-lg overflow-hidden group"
+            className="relative aspect-square rounded-lg overflow-hidden shadow-lg transform hover:scale-105 transition-transform"
           >
             <img
               src={photo.image}

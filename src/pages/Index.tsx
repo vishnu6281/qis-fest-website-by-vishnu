@@ -44,9 +44,8 @@ const Index = () => {
   };
 
   const toggleAdmin = () => {
-    // In a real app, this would involve proper authentication
     const password = prompt("Enter admin password:");
-    if (password === "admin123") { // This is just for demo purposes
+    if (password === "qisfest2k25") {
       setIsAdmin(!isAdmin);
       toast({
         title: isAdmin ? "Admin mode disabled" : "Admin mode enabled",
@@ -64,21 +63,11 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-600 to-purple-600 text-white">
       <main className="container mx-auto px-4 py-8">
-        <div className="flex justify-between items-center mb-8">
-          <div className="text-center flex-1 animate-fade-in">
-            <h1 className="text-4xl md:text-6xl font-bold mb-4">QIS FEST 2K25</h1>
-            <p className="text-xl text-white/80">
-              QIS College of Engineering and Technology
-            </p>
-          </div>
-          <Button
-            variant="outline"
-            size="icon"
-            onClick={toggleAdmin}
-            className="bg-white/10 hover:bg-white/20"
-          >
-            <KeyRound className="h-5 w-5" />
-          </Button>
+        <div className="text-center animate-fade-in mb-16">
+          <h1 className="text-4xl md:text-6xl font-bold mb-4">QIS FEST 2K25</h1>
+          <p className="text-xl text-white/80">
+            QIS College of Engineering and Technology
+          </p>
         </div>
 
         {showCamera ? (
@@ -134,6 +123,17 @@ const Index = () => {
           isAdmin={isAdmin} 
           onDeletePhoto={handleDeletePhoto}
         />
+
+        <div className="fixed bottom-8 right-8">
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={toggleAdmin}
+            className="bg-white/10 hover:bg-white/20"
+          >
+            <KeyRound className="h-5 w-5" />
+          </Button>
+        </div>
       </main>
     </div>
   );
