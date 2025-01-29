@@ -45,7 +45,7 @@ const Index = () => {
 
   const toggleAdmin = () => {
     const password = prompt("Enter admin password:");
-    if (password === "qisfest2k25") {
+    if (password === "Vishnu@062") {
       setIsAdmin(!isAdmin);
       toast({
         title: isAdmin ? "Admin mode disabled" : "Admin mode enabled",
