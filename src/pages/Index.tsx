@@ -3,13 +3,16 @@ import { Camera } from "@/components/Camera";
 import { PhotoMosaic } from "@/components/PhotoMosaic";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Camera as CameraIcon } from "lucide-react";
+import { Camera as CameraIcon, KeyRound } from "lucide-react";
+import { useToast } from "@/components/ui/use-toast";
 
 const Index = () => {
   const [showCamera, setShowCamera] = useState(false);
   const [name, setName] = useState("");
   const [photos, setPhotos] = useState<Array<{ image: string; name: string }>>([]);
   const [tempImage, setTempImage] = useState<string | null>(null);
+  const [isAdmin, setIsAdmin] = useState(false);
+  const { toast } = useToast();
 
   const handleCapture = (image: string) => {
     setTempImage(image);
@@ -22,17 +25,60 @@ const Index = () => {
       setPhotos([...photos, { image: tempImage, name: name.trim() }]);
       setTempImage(null);
       setName("");
+      toast({
+        title: "Photo added successfully!",
+        description: "Your photo has been added to the mosaic.",
+      });
+    }
+  };
+
+  const handleDeletePhoto = (index: number) => {
+    const newPhotos = [...photos];
+    newPhotos.splice(index, 1);
+    setPhotos(newPhotos);
+    toast({
+      title: "Photo deleted",
+      description: "The photo has been removed from the mosaic.",
+      variant: "destructive",
+    });
+  };
+
+  const toggleAdmin = () => {
+    // In a real app, this would involve proper authentication
+    const password = prompt("Enter admin password:");
+    if (password === "admin123") { // This is just for demo purposes
+      setIsAdmin(!isAdmin);
+      toast({
+        title: isAdmin ? "Admin mode disabled" : "Admin mode enabled",
+        description: isAdmin ? "You are now in user mode" : "You can now manage photos",
+      });
+    } else {
+      toast({
+        title: "Invalid password",
+        description: "Please try again with the correct password",
+        variant: "destructive",
+      });
     }
   };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-600 to-purple-600 text-white">
       <main className="container mx-auto px-4 py-8">
-        <div className="text-center mb-12 animate-fade-in">
-          <h1 className="text-4xl md:text-6xl font-bold mb-4">QIS FEST 2K25</h1>
-          <p className="text-xl text-white/80">
-            QIS College of Engineering and Technology
-          </p>
+        <div className="flex justify-between items-center mb-8">
+          <div className="text-center flex-1 animate-fade-in">
+            <h1 className="text-4xl md:text-6xl font-bold mb-4">QIS FEST 2K25</h1>
+            <p className="text-xl text-white/80">
+              QIS College of Engineering and Technology
+            </p>
+          </div>
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={toggleAdmin}
+            className="bg-white/10 hover:bg-white/20"
+          >
+            <KeyRound className="h-5 w-5" />
+          </Button>
         </div>
 
         {showCamera ? (
@@ -83,7 +129,11 @@ const Index = () => {
           </div>
         )}
 
-        <PhotoMosaic photos={photos} />
+        <PhotoMosaic 
+          photos={photos} 
+          isAdmin={isAdmin} 
+          onDeletePhoto={handleDeletePhoto}
+        />
       </main>
     </div>
   );
