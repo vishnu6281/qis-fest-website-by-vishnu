@@ -12,6 +12,7 @@ const Index = () => {
   const [name, setName] = useState("");
   const [photos, setPhotos] = useState<Array<{ image: string; name: string }>>([]);
   const [tempImage, setTempImage] = useState<string | null>(null);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   const handleCapture = (image: string) => {
     const img = new Image();
@@ -62,6 +63,16 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-600 to-purple-600 text-white">
       <main className="container mx-auto px-4 py-8">
+        <div className="flex justify-end mb-4">
+          <Button
+            onClick={() => setIsAdmin(!isAdmin)}
+            variant="secondary"
+            className="bg-white text-black hover:bg-white"
+          >
+            {isAdmin ? "Exit Admin Mode" : "Admin Mode"}
+          </Button>
+        </div>
+        
         <div className="flex flex-col items-center gap-8">
           <img 
             src="/lovable-uploads/ca7c2a52-60b2-4d93-b799-5e0b8d9edb44.png" 
@@ -135,7 +146,7 @@ const Index = () => {
 
         {photos.length > 0 && (
           <div className="mt-16">
-            <PhotoMosaic photos={photos} />
+            <PhotoMosaic photos={photos} isAdmin={isAdmin} />
           </div>
         )}
       </main>
