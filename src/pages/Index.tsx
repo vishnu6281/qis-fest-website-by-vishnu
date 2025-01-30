@@ -101,7 +101,7 @@ const Index = () => {
                       type="button"
                       variant="secondary"
                       onClick={() => setTempImage(null)}
-                      className="flex-1 bg-white/10 text-white border-none"
+                      className="flex-1 bg-white text-black hover:bg-white"
                     >
                       Take Another Photo
                     </Button>

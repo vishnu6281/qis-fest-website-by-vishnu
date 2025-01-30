@@ -1,7 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { PhotoMosaic } from "@/components/PhotoMosaic";
 import { Button } from "@/components/ui/button";
-import { motion } from "framer-motion";
 import { useState } from "react";
 
 const PhotoMosaicPage = () => {
@@ -11,32 +10,27 @@ const PhotoMosaicPage = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-600 to-purple-600 text-white relative">
-      <div className="container mx-auto px-4 py-8 relative">
-        <div className="flex justify-between items-center mb-8">
+      <div className="container mx-auto px-4 py-8">
+        <div className="flex justify-between items-center mb-8 bg-black/20 p-4 rounded-lg">
           <Button 
             onClick={() => navigate("/")}
-            variant="ghost" 
-            className="text-white hover:bg-white/20"
+            variant="secondary"
+            className="bg-white text-black hover:bg-white"
           >
             ← Back to Home
           </Button>
           <Button
             onClick={() => setIsAdmin(!isAdmin)}
-            variant="ghost"
-            className="text-white hover:bg-white/20"
+            variant="secondary"
+            className="bg-white text-black hover:bg-white"
           >
             {isAdmin ? "Exit Admin Mode" : "Admin Mode"}
           </Button>
         </div>
         
-        <motion.h1
-          className="text-6xl font-bold text-center mb-8"
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-        >
+        <h1 className="text-6xl font-bold text-center mb-8 photo-text">
           QIS FEST
-        </motion.h1>
+        </h1>
         
         {photos.length > 0 ? (
           <PhotoMosaic photos={photos} isAdmin={isAdmin} onDeletePhoto={(index) => {
