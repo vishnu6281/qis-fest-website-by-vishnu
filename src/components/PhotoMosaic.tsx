@@ -1,7 +1,8 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Trash2 } from "lucide-react";
 import { Button } from "./ui/button";
 import { motion } from "framer-motion";
+import { useLongPress } from "@/hooks/useLongPress";
 
 interface PhotoMosaicProps {
   photos: Array<{ image: string; name: string }>;
@@ -11,6 +12,13 @@ interface PhotoMosaicProps {
 
 export const PhotoMosaic = ({ photos, isAdmin = false, onDeletePhoto }: PhotoMosaicProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
+  const [selectedPhoto, setSelectedPhoto] = useState<number | null>(null);
+
+  const longPressProps = useLongPress((index: number) => {
+    if (isAdmin && onDeletePhoto) {
+      setSelectedPhoto(index);
+    }
+  });
 
   useEffect(() => {
     if (!containerRef.current) return;
@@ -34,10 +42,11 @@ export const PhotoMosaic = ({ photos, isAdmin = false, onDeletePhoto }: PhotoMos
       >
         QIS FEST
       </motion.h1>
-      <div className="absolute inset-0 grid grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-4 p-8">
+      <div className="absolute inset-0 grid grid-cols-6 md:grid-cols-8 lg:grid-cols-10 gap-4 p-8">
         {photos.map((photo, index) => (
           <motion.div
             key={index}
+            {...longPressProps(index)}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: index * 0.1 }}
@@ -50,11 +59,14 @@ export const PhotoMosaic = ({ photos, isAdmin = false, onDeletePhoto }: PhotoMos
             />
             <div className="absolute inset-0 bg-black/60 opacity-0 hover:opacity-100 transition-opacity duration-300 flex items-center justify-center flex-col gap-2">
               <p className="text-white text-sm font-medium">{photo.name}</p>
-              {isAdmin && onDeletePhoto && (
+              {(isAdmin && onDeletePhoto && (selectedPhoto === index || !selectedPhoto)) && (
                 <Button
                   variant="destructive"
                   size="icon"
-                  onClick={() => onDeletePhoto(index)}
+                  onClick={() => {
+                    onDeletePhoto(index);
+                    setSelectedPhoto(null);
+                  }}
                   className="h-8 w-8"
                 >
                   <Trash2 className="h-4 w-4" />
