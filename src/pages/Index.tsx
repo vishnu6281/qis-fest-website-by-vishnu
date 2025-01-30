@@ -14,14 +14,12 @@ const Index = () => {
   const [tempImage, setTempImage] = useState<string | null>(null);
 
   const handleCapture = (image: string) => {
-    // Compress image before saving
     const img = new Image();
     img.src = image;
     img.onload = () => {
       const canvas = document.createElement('canvas');
       const ctx = canvas.getContext('2d')!;
       
-      // Set smaller dimensions
       const maxWidth = 800;
       const maxHeight = 600;
       let width = img.width;
@@ -43,7 +41,6 @@ const Index = () => {
       canvas.height = height;
       ctx.drawImage(img, 0, 0, width, height);
       
-      // Convert to compressed JPEG
       const compressedImage = canvas.toDataURL('image/jpeg', 0.7);
       setTempImage(compressedImage);
     };
@@ -53,7 +50,9 @@ const Index = () => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (tempImage && name.trim()) {
-      setPhotos([...photos, { image: tempImage, name: name.trim() }]);
+      const newPhotos = [...photos, { image: tempImage, name: name.trim() }];
+      setPhotos(newPhotos);
+      localStorage.setItem("photos", JSON.stringify(newPhotos));
       setTempImage(null);
       setName("");
       toast.success("Photo added successfully!");
@@ -67,7 +66,7 @@ const Index = () => {
           <img 
             src="/lovable-uploads/ca7c2a52-60b2-4d93-b799-5e0b8d9edb44.png" 
             alt="QIS Fest Logo" 
-            className="w-full max-w-lg mx-auto animate-fade-in"
+            className="w-64 mx-auto animate-fade-in"
           />
           
           <motion.div
@@ -102,9 +101,9 @@ const Index = () => {
                       type="button"
                       variant="outline"
                       onClick={() => setTempImage(null)}
-                      className="flex-1"
+                      className="flex-1 text-white border-white/20 hover:bg-white/10"
                     >
-                      Retake
+                      Take Another Photo
                     </Button>
                     <Button type="submit" className="flex-1">
                       Add to Mosaic
@@ -112,22 +111,24 @@ const Index = () => {
                   </div>
                 </form>
               ) : (
-                <Button
-                  onClick={() => setShowCamera(true)}
-                  size="lg"
-                  className="bg-white/10 backdrop-blur-sm hover:bg-white/20 text-xl py-6 px-8"
-                >
-                  Take a Photo
-                </Button>
+                <>
+                  <Button
+                    onClick={() => setShowCamera(true)}
+                    size="lg"
+                    className="bg-white/10 backdrop-blur-sm hover:bg-white/20 text-xl py-6 px-8"
+                  >
+                    Take a Photo
+                  </Button>
+                  
+                  <Button
+                    size="lg"
+                    onClick={() => navigate("/photo-mosaic")}
+                    className="bg-white/10 backdrop-blur-sm hover:bg-white/20 text-xl py-6 px-8"
+                  >
+                    Digital Group Photo
+                  </Button>
+                </>
               )}
-              
-              <Button
-                size="lg"
-                onClick={() => navigate("/photo-mosaic")}
-                className="bg-white/10 backdrop-blur-sm hover:bg-white/20 text-xl py-6 px-8"
-              >
-                Digital Group Photo
-              </Button>
             </div>
           </motion.div>
         </div>
