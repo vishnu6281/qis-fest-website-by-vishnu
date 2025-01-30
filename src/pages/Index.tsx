@@ -99,9 +99,9 @@ const Index = () => {
                   <div className="flex gap-2">
                     <Button
                       type="button"
-                      variant="outline"
+                      variant="secondary"
                       onClick={() => setTempImage(null)}
-                      className="flex-1 text-white border-white/20 hover:bg-white/10"
+                      className="flex-1 bg-white/10 text-white border-none"
                     >
                       Take Another Photo
                     </Button>
