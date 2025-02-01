@@ -3,9 +3,8 @@ import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";
 import { Camera } from "@/components/Camera";
 import { toast } from "sonner";
-import { supabase } from "@/lib/supabase";
+import { supabase } from "@/integrations/supabase/client";
 
-// Array of gradient backgrounds
 const gradients = [
   "bg-gradient-to-br from-blue-600 to-purple-600",
   "bg-gradient-to-br from-pink-500 to-orange-500",
@@ -49,6 +48,7 @@ const Index = () => {
       if (error) throw error;
       if (data) setPhotos(data);
     } catch (error) {
+      console.error('Error fetching photos:', error);
       toast.error("Error fetching photos");
     }
   };
@@ -74,6 +74,7 @@ const Index = () => {
 
       setTempImage(publicUrl);
     } catch (error) {
+      console.error('Error uploading photo:', error);
       toast.error("Failed to upload photo");
     }
     setShowCamera(false);
@@ -96,6 +97,7 @@ const Index = () => {
         toast.success("Photo added successfully!");
         fetchPhotos(); // Refresh the photos list
       } catch (error) {
+        console.error('Error saving photo:', error);
         toast.error("Error saving photo");
       }
     }
