@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { Camera } from "@/components/Camera";
 import { toast } from "sonner";
+import { supabase } from "@/lib/supabase";
 
 // Array of gradient backgrounds
 const gradients = [
@@ -10,13 +11,16 @@ const gradients = [
   "bg-gradient-to-br from-pink-500 to-orange-500",
   "bg-gradient-to-br from-green-400 to-blue-500",
   "bg-gradient-to-br from-purple-500 to-pink-500",
-  "bg-gradient-to-br from-yellow-400 to-red-500"
+  "bg-gradient-to-br from-yellow-400 to-red-500",
+  "bg-gradient-to-br from-indigo-500 to-pink-500",
+  "bg-gradient-to-br from-teal-400 to-blue-500",
+  "bg-gradient-to-br from-orange-400 to-rose-500"
 ];
 
 const Index = () => {
   const [showCamera, setShowCamera] = useState(false);
   const [name, setName] = useState("");
-  const [photos, setPhotos] = useState<Array<{ image: string; name: string }>>([]);
+  const [photos, setPhotos] = useState<Array<{ id: string; image_url: string; name: string }>>([]);
   const [tempImage, setTempImage] = useState<string | null>(null);
   const [currentGradient, setCurrentGradient] = useState(gradients[0]);
 
@@ -30,49 +34,70 @@ const Index = () => {
     return () => clearInterval(intervalId);
   }, []);
 
-  const handleCapture = (image: string) => {
-    const img = new Image();
-    img.src = image;
-    img.onload = () => {
-      const canvas = document.createElement('canvas');
-      const ctx = canvas.getContext('2d')!;
+  // Fetch photos on component mount
+  useEffect(() => {
+    fetchPhotos();
+  }, []);
+
+  const fetchPhotos = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('photos')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      if (data) setPhotos(data);
+    } catch (error) {
+      toast.error("Error fetching photos");
+    }
+  };
+
+  const handleCapture = async (image: string) => {
+    try {
+      // Convert base64 to blob
+      const base64Data = image.split(',')[1];
+      const blob = await fetch(`data:image/jpeg;base64,${base64Data}`).then(res => res.blob());
       
-      const maxWidth = 800;
-      const maxHeight = 600;
-      let width = img.width;
-      let height = img.height;
-      
-      if (width > height) {
-        if (width > maxWidth) {
-          height *= maxWidth / width;
-          width = maxWidth;
-        }
-      } else {
-        if (height > maxHeight) {
-          width *= maxHeight / height;
-          height = maxHeight;
-        }
-      }
-      
-      canvas.width = width;
-      canvas.height = height;
-      ctx.drawImage(img, 0, 0, width, height);
-      
-      const compressedImage = canvas.toDataURL('image/jpeg', 0.7);
-      setTempImage(compressedImage);
-    };
+      // Upload to Supabase Storage
+      const fileName = `${Date.now()}.jpg`;
+      const { data: uploadData, error: uploadError } = await supabase.storage
+        .from('photos')
+        .upload(fileName, blob);
+
+      if (uploadError) throw uploadError;
+
+      // Get public URL
+      const { data: { publicUrl } } = supabase.storage
+        .from('photos')
+        .getPublicUrl(fileName);
+
+      setTempImage(publicUrl);
+    } catch (error) {
+      toast.error("Failed to upload photo");
+    }
     setShowCamera(false);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (tempImage && name.trim()) {
-      const newPhotos = [...photos, { image: tempImage, name: name.trim() }];
-      setPhotos(newPhotos);
-      localStorage.setItem("photos", JSON.stringify(newPhotos));
-      setTempImage(null);
-      setName("");
-      toast.success("Photo added successfully!");
+      try {
+        const { error } = await supabase
+          .from('photos')
+          .insert([
+            { image_url: tempImage, name: name.trim() }
+          ]);
+
+        if (error) throw error;
+
+        setTempImage(null);
+        setName("");
+        toast.success("Photo added successfully!");
+        fetchPhotos(); // Refresh the photos list
+      } catch (error) {
+        toast.error("Error saving photo");
+      }
     }
   };
 
@@ -148,50 +173,59 @@ const Index = () => {
           </motion.div>
         </div>
 
-        {photos.length > 0 && (
-          <div className="fixed inset-0 pointer-events-none">
-            {photos.map((photo, index) => (
-              <motion.div
-                key={index}
-                className="absolute"
-                initial={{ x: Math.random() * window.innerWidth, y: Math.random() * window.innerHeight }}
-                animate={{
-                  x: [
-                    Math.random() * window.innerWidth,
-                    Math.random() * window.innerWidth,
-                    Math.random() * window.innerWidth,
-                  ],
-                  y: [
-                    Math.random() * window.innerHeight,
-                    Math.random() * window.innerHeight,
-                    Math.random() * window.innerHeight,
-                  ],
-                }}
-                transition={{
-                  duration: 30,
-                  repeat: Infinity,
-                  repeatType: "reverse",
-                  ease: "linear",
-                }}
+        <AnimatePresence>
+          {photos.map((photo, index) => (
+            <motion.div
+              key={photo.id}
+              className="absolute"
+              initial={{ x: Math.random() * window.innerWidth, y: Math.random() * window.innerHeight }}
+              animate={{
+                x: [
+                  Math.random() * window.innerWidth,
+                  Math.random() * window.innerWidth,
+                  Math.random() * window.innerWidth,
+                ],
+                y: [
+                  Math.random() * window.innerHeight,
+                  Math.random() * window.innerHeight,
+                  Math.random() * window.innerHeight,
+                ],
+              }}
+              transition={{
+                duration: 30,
+                repeat: Infinity,
+                repeatType: "reverse",
+                ease: "linear",
+                delay: index * 0.2,
+              }}
+              drag
+              dragConstraints={{
+                top: 0,
+                left: 0,
+                right: window.innerWidth - 128,
+                bottom: window.innerHeight - 128,
+              }}
+              whileHover={{ scale: 1.1, zIndex: 50 }}
+            >
+              <motion.div 
+                className="relative w-32 h-32 rounded-lg overflow-hidden shadow-lg cursor-pointer"
+                initial={{ opacity: 0, scale: 0.5 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.5 }}
+                transition={{ duration: 0.5 }}
               >
-                <motion.div 
-                  className="relative w-32 h-32 rounded-lg overflow-hidden shadow-lg"
-                  whileHover={{ scale: 1.1 }}
-                  transition={{ duration: 0.3 }}
-                >
-                  <img
-                    src={photo.image}
-                    alt={photo.name}
-                    className="w-full h-full object-cover"
-                  />
-                  <div className="absolute bottom-0 left-0 right-0 bg-black/50 backdrop-blur-sm p-1">
-                    <p className="text-white text-xs truncate text-center">{photo.name}</p>
-                  </div>
-                </motion.div>
+                <img
+                  src={photo.image_url}
+                  alt={photo.name}
+                  className="w-full h-full object-cover"
+                />
+                <div className="absolute bottom-0 left-0 right-0 bg-black/50 backdrop-blur-sm p-1">
+                  <p className="text-white text-xs truncate text-center">{photo.name}</p>
+                </div>
               </motion.div>
-            ))}
-          </div>
-        )}
+            </motion.div>
+          ))}
+        </AnimatePresence>
       </main>
     </div>
   );
