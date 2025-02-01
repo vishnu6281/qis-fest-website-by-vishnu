@@ -1,14 +1,34 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import { Camera } from "@/components/Camera";
 import { toast } from "sonner";
+
+// Array of gradient backgrounds
+const gradients = [
+  "bg-gradient-to-br from-blue-600 to-purple-600",
+  "bg-gradient-to-br from-pink-500 to-orange-500",
+  "bg-gradient-to-br from-green-400 to-blue-500",
+  "bg-gradient-to-br from-purple-500 to-pink-500",
+  "bg-gradient-to-br from-yellow-400 to-red-500"
+];
 
 const Index = () => {
   const [showCamera, setShowCamera] = useState(false);
   const [name, setName] = useState("");
   const [photos, setPhotos] = useState<Array<{ image: string; name: string }>>([]);
   const [tempImage, setTempImage] = useState<string | null>(null);
+  const [currentGradient, setCurrentGradient] = useState(gradients[0]);
+
+  // Effect for changing background gradient
+  useEffect(() => {
+    const intervalId = setInterval(() => {
+      const randomIndex = Math.floor(Math.random() * gradients.length);
+      setCurrentGradient(gradients[randomIndex]);
+    }, 5000); // Change every 5 seconds
+
+    return () => clearInterval(intervalId);
+  }, []);
 
   const handleCapture = (image: string) => {
     const img = new Image();
@@ -57,22 +77,25 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-600 to-purple-600 text-white overflow-hidden">
+    <div className={`min-h-screen transition-all duration-1000 ${currentGradient} text-white overflow-hidden`}>
       <main className="container mx-auto px-4 py-8 relative">
         <div className="flex flex-col items-center gap-8">
-          <img 
+          <motion.img 
             src="/lovable-uploads/ca7c2a52-60b2-4d93-b799-5e0b8d9edb44.png" 
             alt="QIS Fest Logo" 
-            className="w-64 mx-auto animate-fade-in"
-          />
-          
-          <motion.div
+            className="w-64 mx-auto"
             initial={{ scale: 0.5, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             transition={{ duration: 0.8, type: "spring", bounce: 0.4 }}
+          />
+          
+          <motion.div
+            initial={{ y: 50, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ duration: 0.8, delay: 0.2 }}
             className="text-center w-full"
           >
-            <h1 className="text-4xl md:text-6xl font-bold mb-4">QIS FEST 2K25</h1>
+            <h1 className="text-4xl md:text-6xl font-bold mb-4 photo-text">QIS FEST 2K25</h1>
             <p className="text-xl text-white/80 mb-8">
               QIS College of Engineering and Technology
             </p>
@@ -82,9 +105,14 @@ const Index = () => {
                 <Camera onCapture={handleCapture} onClose={() => setShowCamera(false)} />
               ) : tempImage ? (
                 <form onSubmit={handleSubmit} className="w-full space-y-4">
-                  <div className="relative aspect-video rounded-lg overflow-hidden">
+                  <motion.div 
+                    className="relative aspect-video rounded-lg overflow-hidden"
+                    initial={{ scale: 0.9, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    transition={{ duration: 0.5 }}
+                  >
                     <img src={tempImage} alt="Preview" className="w-full h-full object-cover" />
-                  </div>
+                  </motion.div>
                   <input
                     type="text"
                     placeholder="Enter your name"
@@ -140,22 +168,26 @@ const Index = () => {
                   ],
                 }}
                 transition={{
-                  duration: 20,
+                  duration: 30,
                   repeat: Infinity,
                   repeatType: "reverse",
                   ease: "linear",
                 }}
               >
-                <div className="relative w-32 h-32 rounded-lg overflow-hidden shadow-lg">
+                <motion.div 
+                  className="relative w-32 h-32 rounded-lg overflow-hidden shadow-lg"
+                  whileHover={{ scale: 1.1 }}
+                  transition={{ duration: 0.3 }}
+                >
                   <img
                     src={photo.image}
                     alt={photo.name}
                     className="w-full h-full object-cover"
                   />
-                  <div className="absolute bottom-0 left-0 right-0 bg-black/50 p-1">
-                    <p className="text-white text-xs truncate">{photo.name}</p>
+                  <div className="absolute bottom-0 left-0 right-0 bg-black/50 backdrop-blur-sm p-1">
+                    <p className="text-white text-xs truncate text-center">{photo.name}</p>
                   </div>
-                </div>
+                </motion.div>
               </motion.div>
             ))}
           </div>
