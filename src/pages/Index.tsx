@@ -1,18 +1,14 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import { Camera } from "@/components/Camera";
-import { PhotoMosaic } from "@/components/PhotoMosaic";
 import { toast } from "sonner";
 
 const Index = () => {
-  const navigate = useNavigate();
   const [showCamera, setShowCamera] = useState(false);
   const [name, setName] = useState("");
   const [photos, setPhotos] = useState<Array<{ image: string; name: string }>>([]);
   const [tempImage, setTempImage] = useState<string | null>(null);
-  const [isAdmin, setIsAdmin] = useState(false);
 
   const handleCapture = (image: string) => {
     const img = new Image();
@@ -61,18 +57,8 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-600 to-purple-600 text-white">
-      <main className="container mx-auto px-4 py-8">
-        <div className="flex justify-end mb-4">
-          <Button
-            onClick={() => setIsAdmin(!isAdmin)}
-            variant="secondary"
-            className="bg-white text-black hover:bg-white"
-          >
-            {isAdmin ? "Exit Admin Mode" : "Admin Mode"}
-          </Button>
-        </div>
-        
+    <div className="min-h-screen bg-gradient-to-br from-blue-600 to-purple-600 text-white overflow-hidden">
+      <main className="container mx-auto px-4 py-8 relative">
         <div className="flex flex-col items-center gap-8">
           <img 
             src="/lovable-uploads/ca7c2a52-60b2-4d93-b799-5e0b8d9edb44.png" 
@@ -112,41 +98,66 @@ const Index = () => {
                       type="button"
                       variant="secondary"
                       onClick={() => setTempImage(null)}
-                      className="flex-1 bg-white text-black hover:bg-white"
+                      className="flex-1 bg-white text-black hover:bg-white/90"
                     >
                       Take Another Photo
                     </Button>
                     <Button type="submit" className="flex-1">
-                      Add to Mosaic
+                      Add to Collection
                     </Button>
                   </div>
                 </form>
               ) : (
-                <>
-                  <Button
-                    onClick={() => setShowCamera(true)}
-                    size="lg"
-                    className="bg-white/10 backdrop-blur-sm hover:bg-white/20 text-xl py-6 px-8"
-                  >
-                    Take a Photo
-                  </Button>
-                  
-                  <Button
-                    size="lg"
-                    onClick={() => navigate("/photo-mosaic")}
-                    className="bg-white/10 backdrop-blur-sm hover:bg-white/20 text-xl py-6 px-8"
-                  >
-                    Digital Group Photo
-                  </Button>
-                </>
+                <Button
+                  onClick={() => setShowCamera(true)}
+                  size="lg"
+                  className="bg-white/10 backdrop-blur-sm hover:bg-white/20 text-xl py-6 px-8"
+                >
+                  Take a Photo
+                </Button>
               )}
             </div>
           </motion.div>
         </div>
 
         {photos.length > 0 && (
-          <div className="mt-16">
-            <PhotoMosaic photos={photos} isAdmin={isAdmin} />
+          <div className="fixed inset-0 pointer-events-none">
+            {photos.map((photo, index) => (
+              <motion.div
+                key={index}
+                className="absolute"
+                initial={{ x: Math.random() * window.innerWidth, y: Math.random() * window.innerHeight }}
+                animate={{
+                  x: [
+                    Math.random() * window.innerWidth,
+                    Math.random() * window.innerWidth,
+                    Math.random() * window.innerWidth,
+                  ],
+                  y: [
+                    Math.random() * window.innerHeight,
+                    Math.random() * window.innerHeight,
+                    Math.random() * window.innerHeight,
+                  ],
+                }}
+                transition={{
+                  duration: 20,
+                  repeat: Infinity,
+                  repeatType: "reverse",
+                  ease: "linear",
+                }}
+              >
+                <div className="relative w-32 h-32 rounded-lg overflow-hidden shadow-lg">
+                  <img
+                    src={photo.image}
+                    alt={photo.name}
+                    className="w-full h-full object-cover"
+                  />
+                  <div className="absolute bottom-0 left-0 right-0 bg-black/50 p-1">
+                    <p className="text-white text-xs truncate">{photo.name}</p>
+                  </div>
+                </div>
+              </motion.div>
+            ))}
           </div>
         )}
       </main>
