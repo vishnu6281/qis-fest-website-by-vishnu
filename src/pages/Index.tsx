@@ -23,17 +23,15 @@ const Index = () => {
   const [tempImage, setTempImage] = useState<string | null>(null);
   const [currentGradient, setCurrentGradient] = useState(gradients[0]);
 
-  // Effect for changing background gradient
   useEffect(() => {
     const intervalId = setInterval(() => {
       const randomIndex = Math.floor(Math.random() * gradients.length);
       setCurrentGradient(gradients[randomIndex]);
-    }, 5000); // Change every 5 seconds
+    }, 5000);
 
     return () => clearInterval(intervalId);
   }, []);
 
-  // Fetch photos on component mount
   useEffect(() => {
     fetchPhotos();
   }, []);
@@ -57,15 +55,23 @@ const Index = () => {
     try {
       // Convert base64 to blob
       const base64Data = image.split(',')[1];
-      const blob = await fetch(`data:image/jpeg;base64,${base64Data}`).then(res => res.blob());
+      const blob = await fetch(image).then(res => res.blob());
       
-      // Upload to Supabase Storage
+      // Generate a unique filename
       const fileName = `${Date.now()}.jpg`;
+
+      // Upload to Supabase Storage
       const { data: uploadData, error: uploadError } = await supabase.storage
         .from('photos')
-        .upload(fileName, blob);
+        .upload(fileName, blob, {
+          contentType: 'image/jpeg',
+          upsert: false
+        });
 
-      if (uploadError) throw uploadError;
+      if (uploadError) {
+        console.error('Upload error:', uploadError);
+        throw uploadError;
+      }
 
       // Get public URL
       const { data: { publicUrl } } = supabase.storage
@@ -73,11 +79,13 @@ const Index = () => {
         .getPublicUrl(fileName);
 
       setTempImage(publicUrl);
+      setShowCamera(false);
+      toast.success("Photo captured successfully!");
     } catch (error) {
       console.error('Error uploading photo:', error);
-      toast.error("Failed to upload photo");
+      toast.error("Failed to upload photo. Please try again.");
+      setShowCamera(false);
     }
-    setShowCamera(false);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -95,7 +103,7 @@ const Index = () => {
         setTempImage(null);
         setName("");
         toast.success("Photo added successfully!");
-        fetchPhotos(); // Refresh the photos list
+        fetchPhotos();
       } catch (error) {
         console.error('Error saving photo:', error);
         toast.error("Error saving photo");
